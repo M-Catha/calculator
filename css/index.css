@@ -1,0 +1,100 @@
+body {
+	background-image:url("../images/lodyas.png");
+	background-repeat:repeat;
+	background-attachment:fixed;
+}
+
+.container {
+	background-image:url("../images/squairy_light.png");
+	background-repeat:repeat;
+	margin:100px auto;
+	width:70%;
+	min-width:425px;
+	max-width:500px;
+	height:675px;
+	border:1px black solid;
+	border-radius:40px;
+	-webkit-box-shadow: 10px 10px 21px -3px rgba(0,0,0,0.75);
+	-moz-box-shadow: 10px 10px 21px -3px rgba(0,0,0,0.75);
+	box-shadow: 10px 10px 21px -3px rgba(0,0,0,0.75);
+}
+
+#title {
+	width:100%;
+	font-family:'Lobster';
+	font-size:4.6vh;
+	text-align:center;
+}
+
+.inputScreen {
+	margin:10px auto;
+	width:83%;
+	padding-right:10px;
+	font-family:'Orbitron';
+	border:1px black solid;
+	border-radius:5px;
+	background-color:rgb(195, 194, 171);
+	text-align:right;
+	overflow-x:auto;
+}
+
+.warningScreen {
+	background-color:rgb(99, 0, 0);
+	color:white;
+}
+
+.currentEntry {
+	font-size:2.5em;
+}
+
+.totalEntry {
+	font-size:1.5em;
+}
+
+.buttonRow {
+	margin:10px auto;
+	width:100%;
+	text-align:center;
+	white-space:nowrap;
+}
+
+.button {
+	width:20%;
+	margin:10px 2px;
+	display:inline-block;
+	font-family:'Baloo Thambi';
+	font-size:1.5em;
+	text-align:center;
+	color: white;
+  	background-color: rgb(33, 118, 255);
+  	border: none;
+  	border-radius: 15px;
+  	box-shadow: 0 10px rgb(0, 18, 48);
+}
+
+.button:hover {
+	background-color: rgb(0, 74, 193);
+}
+
+.button:active {
+	background-color: rgb(0, 74, 193);
+ 	box-shadow: 0 5px rgb(0, 18, 48);
+ 	transform: translateY(5px);
+}
+
+.allClear, .clearEntry {
+	background-color: rgb(191, 17, 17);
+  	border: none;
+  	border-radius: 15px;
+  	box-shadow: 0 10px rgb(0, 18, 48)
+}
+
+.allClear:hover, .clearEntry:hover {
+	background-color: rgb(147, 0, 0);
+}
+
+.allClear:active, .clearEntry:active {
+	background-color: rgb(147, 0, 0);
+ 	box-shadow: 0 5px rgb(96, 9, 9);
+ 	transform: translateY(5px);
+}
