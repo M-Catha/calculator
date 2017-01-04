@@ -96,7 +96,7 @@ function addDecimal() {
 	hitZero = false;
 	var eqLen = totalEntry.length;
 
-	if (decimalCount > 1 || hitEqual || hasError) {											
+	if (decimalCount > 1 || hitEqual ||	hasError) {											
 		return;								
 	} else if (hitNegate && eqLen > 1) {
 		return;
@@ -122,8 +122,8 @@ function exponent () {
 	if (totalEntry.length < 1) {
 		currentEntry = "";
 	} else if (expCount > 0 || hitOperation || hasError)  { // Can't add 2 exponents to 1 number,
-		return;						// after hitting operator, or if after
-	} else {						// an error
+		return;												// after hitting operator, or if after
+	} else {												// an error
 
 		hitEqual = false;
 		hitOperation = true;
@@ -149,25 +149,21 @@ function negate() {
 		return;
 	} else if (hitEqual) {  // After equating, change the sign on both current and total entries
 		
-		numToNegate = Number(result) * -1;
-		
-		if (numToNegate > 0) {
-			currentEntry = numToNegate;
-			totalEntry = currentEntry;
-		} else {
-			currentEntry = ops.opPar + numToNegate + ops.clPar;
-			totalEntry = currentEntry;
-		}
+		changeSign(result);
+
+		$(".currentEntry").text(currentEntry);
+		$(".totalEntry").text(totalEntry);
 		
 	} else {
 
 		hitNegate = true;
-
-		numToNegate = Number(currentEntry);
 		var joinedEquation = "";
 
-		if (numToNegate > 0) {
-			numToNegate *= -1;
+		var noParenNum = currentEntry.toString().replace(/[()]/g, "");
+		numToNegate = Number(noParenNum) * -1;
+		currentEntry = numToNegate;
+
+		if (numToNegate < 0) {
 			numToNegate = ops.opPar + numToNegate + ops.clPar;
 			currentEntry = numToNegate;
 		}
@@ -192,10 +188,27 @@ function negate() {
 		}
 		joinedEquation = splEquation.join("");
 		totalEntry = joinedEquation + numToNegate;
+		$(".currentEntry").text(currentEntry);
+		$(".totalEntry").text(totalEntry);
 	}
+}
+
+/***************************************
+/* CHANGE SIGN ON TOTAL
+****************************************/
+function changeSign(eq_string) {
 	
-	$(".currentEntry").text(currentEntry);
-	$(".totalEntry").text(totalEntry);
+	var noParenNum = eq_string.toString().replace(/[()]/g, "");
+	numToNegate = Number(noParenNum) * -1;
+	result = numToNegate;
+
+	if (numToNegate < 0) {
+		currentEntry = ops.opPar + numToNegate + ops.clPar;
+		totalEntry = currentEntry;
+	} else {
+		currentEntry = numToNegate;
+		totalEntry = currentEntry;
+	}
 }
 
 /***************************************
@@ -254,25 +267,25 @@ function popOff(array, arr_length) {
 	var joinedArr = "";
 
 	if (isNaN(Number(arr[i])) && arr[i] !== ops.clPar) {  // If last index is an operator (not a closed paren),
-		arr[i] = "";				     // pop it off and re-enable ability to add operator
+		arr[i] = "";									  // pop it off and re-enable ability to add operator
 		hitOperation = false;
 	} else {
 		while(i > -1) {
 			if (arr[i] === ops.add || arr[i] === ops.mult ||	// If operator is encountered, stop immediately
 				arr[i] === ops.div || arr[i] === ops.caret) {
 				break;
-			} else if (arr[i] === ops.sub) {		// If operator is a minus,
-				if (arr[i - 1] === ops.opPar) {		// Check operator behind for an open paren
-					arr[i] = "";			// Blank out "-" and continue
+			} else if (arr[i] === ops.sub) {					// If operator is a minus,
+				if (arr[i - 1] === ops.opPar) {					// Check operator behind for an open paren
+					arr[i] = "";								// Blank out "-" and continue
 					i--;
-				} else {				// Else, stop immediately
+				} else {										// Else, stop immediately
 					break;
 				}
-			} else if (arr[i - 1] === ops.caret) {		// Check if character behind removed character is caret
+			} else if (arr[i - 1] === ops.caret) {				// Check if character behind removed character is caret
 				arr[i] = "";
-				hitOperation = true;			// If so, disable ability to add operator
+				hitOperation = true;							// If so, disable ability to add operator
 				i--;
-			} else {					// If no other condition is met, remove character
+			} else {											// If no other condition is met, remove character
 				arr[i] = "";
 				i--;
 			}
@@ -280,6 +293,7 @@ function popOff(array, arr_length) {
 	}
 
 	joinedArr = arr.join("");
+
 	return joinedArr;
 }
 
@@ -335,10 +349,10 @@ function formatEquation(eq_string) {
 	if (caretIndex !== -1) {
 
 			// Construct newly formatted string
-			var frontEq = getFrontEquation(eq_string, caretIndex).join("");
+			var frontEq = getFrontEquation(eq_string, caretIndex);
 			var baseNumber = getBaseNumber(eq_string, caretIndex);
 			var exponential = getExponential(eq_string, caretIndex);
-			var backEq = getBackEquation(eq_string, caretIndex).join("");
+			var backEq = getBackEquation(eq_string, caretIndex);
 
 			finalEq = frontEq + "Math.pow(" + baseNumber + "," + exponential + ")" + backEq;
 	}
@@ -432,6 +446,13 @@ function getExponential(array, current_index) {
 		if (newArr[i] === ops.add || newArr[i] === ops.mult ||
 			newArr[i] === ops.div || newArr[i] === ops.caret) {
 			break;
+		} else if (newArr[i] === ops.sub) {
+			if (newArr[i - 1] === ops.opPar) {
+				tempExp += newArr[i];
+				i++;
+			} else {
+				break;
+			}
 		}
 		tempExp += newArr[i];
 		i++;
@@ -465,7 +486,8 @@ function getFrontEquation (array, current_index) {
 			i--;
 		}
 	}
-	return newArr;
+	var joinedArr = newArr.join("");
+	return joinedArr;
 }
 
 /***************************************
@@ -479,22 +501,27 @@ function getBackEquation (array, current_index) {
 	var i = 0;
 
 	while (i < eqLen) {
+		
+		var clParIndex = newArr.indexOf(ops.clPar);
+
 		if (newArr[i] === ops.add || newArr[i] === ops.mult ||
 			newArr[i] === ops.div) {
 			break;
 		} else if (newArr[i] === ops.sub) {
-			if (newArr[i - 1] === "") {
+			if (newArr[i - 1] === ""  && clParIndex === -1) {
+				break;
+			} else {
 				newArr[i] = "";
 				i++;
-			} else {
-				break;
 			}
 		} else {
 			newArr[i] = "";
 			i++;
 		}
 	}
-	return newArr;
+
+	var joinedArr = newArr.join("");
+	return joinedArr;
 }
 
 /***************************************
@@ -514,6 +541,8 @@ function checkInputLength() {
 		errorMessage = "Total Entry Limit Exceeded!";
 		displayResults(errorMessage, errString, true);
 	}
+
+
 }
 /***************************************
 /* ROUNDING FUNCTION
