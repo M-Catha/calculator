@@ -94,10 +94,12 @@ function addDecimal() {
 	checkInputLength();
 	decimalCount++;
 	hitZero = false;
+	var eqLen = totalEntry.length;
 
-	if (decimalCount > 1 || hitEqual ||		// Can't add decimals to numbers that 	
-	    hitNegate || hasError ) { 			// have them, equated numbers, negated numbers,												
-		return;								// or errors	
+	if (decimalCount > 1 || hitEqual || hasError) {											
+		return;								
+	} else if (hitNegate && eqLen > 1) {
+		return;
 	} else {
 		hitOperation = true;
 		currentEntry += ops.dec;
@@ -115,12 +117,13 @@ function exponent () {
 	checkInputLength();
 	decimalCount = 0;
 	hitZero = false;
+	hitNegate = false;
 
 	if (totalEntry.length < 1) {
 		currentEntry = "";
 	} else if (expCount > 0 || hitOperation || hasError)  { // Can't add 2 exponents to 1 number,
-		return;												// after hitting operator, or if after
-	} else {												// an error
+		return;						// after hitting operator, or if after
+	} else {						// an error
 
 		hitEqual = false;
 		hitOperation = true;
@@ -251,25 +254,25 @@ function popOff(array, arr_length) {
 	var joinedArr = "";
 
 	if (isNaN(Number(arr[i])) && arr[i] !== ops.clPar) {  // If last index is an operator (not a closed paren),
-		arr[i] = "";									  // pop it off and re-enable ability to add operator
+		arr[i] = "";				     // pop it off and re-enable ability to add operator
 		hitOperation = false;
 	} else {
 		while(i > -1) {
 			if (arr[i] === ops.add || arr[i] === ops.mult ||	// If operator is encountered, stop immediately
 				arr[i] === ops.div || arr[i] === ops.caret) {
 				break;
-			} else if (arr[i] === ops.sub) {					// If operator is a minus,
-				if (arr[i - 1] === ops.opPar) {					// Check operator behind for an open paren
-					arr[i] = "";								// Blank out "-" and continue
+			} else if (arr[i] === ops.sub) {		// If operator is a minus,
+				if (arr[i - 1] === ops.opPar) {		// Check operator behind for an open paren
+					arr[i] = "";			// Blank out "-" and continue
 					i--;
-				} else {										// Else, stop immediately
+				} else {				// Else, stop immediately
 					break;
 				}
-			} else if (arr[i - 1] === ops.caret) {				// Check if character behind removed character is caret
+			} else if (arr[i - 1] === ops.caret) {		// Check if character behind removed character is caret
 				arr[i] = "";
-				hitOperation = true;							// If so, disable ability to add operator
+				hitOperation = true;			// If so, disable ability to add operator
 				i--;
-			} else {											// If no other condition is met, remove character
+			} else {					// If no other condition is met, remove character
 				arr[i] = "";
 				i--;
 			}
@@ -277,7 +280,6 @@ function popOff(array, arr_length) {
 	}
 
 	joinedArr = arr.join("");
-
 	return joinedArr;
 }
 
@@ -512,8 +514,6 @@ function checkInputLength() {
 		errorMessage = "Total Entry Limit Exceeded!";
 		displayResults(errorMessage, errString, true);
 	}
-
-
 }
 /***************************************
 /* ROUNDING FUNCTION
