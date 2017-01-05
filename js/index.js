@@ -14,15 +14,19 @@ var hitNegate = true;
 var hitExp = false;
 var hasError = false;
 
+// Ensure all characters are equated as intended
 var ops = {
-	add: String.fromCharCode(43),
-	sub: String.fromCharCode(45),
-	mult: String.fromCharCode(215),
-	div: String.fromCharCode(247),
-	caret: String.fromCharCode(94),
-	dec: String.fromCharCode(46),
-	opPar: String.fromCharCode(40),
-	clPar: String.fromCharCode(41),
+	add: String.fromCharCode(43),	// "+"
+	sub: String.fromCharCode(45),	// "-"
+	mult: String.fromCharCode(215),	// "×"
+	div: String.fromCharCode(247),	// "÷"
+	caret: String.fromCharCode(94),	// "^"
+	dec: String.fromCharCode(46),	// ".""
+	opPar: String.fromCharCode(40),	// "("
+	clPar: String.fromCharCode(41),	// ")"
+	ast: String.fromCharCode(42),	// "*"
+	slash: String.fromCharCode(47),	// "/"
+	dash: String.fromCharCode(8211)	// "–""
 }
 
 /***************************************
@@ -32,7 +36,7 @@ function getValueNum() {
 
 	checkInputLength();
 
-	if (hitEqual || hitZero || hasError) { // Can't enter number after hitting equals or an error
+	if (hitEqual || hitZero || hasError) {
 		return;
 	} else {
 		
@@ -71,7 +75,7 @@ function getValueOperation() {
 	expCount = 0;
 	decimalCount = 0;
 
-	if (hitOperation || hasError) { // Can't enter double operators or after an error
+	if (hitOperation || hasError) {
 		currentEntry = "";
 		return;
 	} else {
@@ -96,9 +100,9 @@ function addDecimal() {
 	hitZero = false;
 	var eqLen = totalEntry.length;
 
-	if (decimalCount > 1 || hitEqual ||	hasError) {											
-		return;								
-	} else if (hitNegate && eqLen > 1) {
+	if (decimalCount > 1 || hitEqual ||	hasError) {	
+		return;
+	} else if (hitNegate && eqLen > 1) {			
 		return;
 	} else {
 		hitOperation = true;
@@ -121,18 +125,18 @@ function exponent () {
 
 	if (totalEntry.length < 1) {
 		currentEntry = "";
-	} else if (expCount > 0 || hitOperation || hasError)  { // Can't add 2 exponents to 1 number,
-		return;												// after hitting operator, or if after
-	} else {												// an error
+	} else if (expCount > 0 || hitOperation || hasError)  {
+		return;
+	} else {
 
 		hitEqual = false;
 		hitOperation = true;
 		expCount++;
 		currentEntry = ops.caret;
 		totalEntry += ops.caret;
+		
 		$(".currentEntry").text(currentEntry);
 		$(".totalEntry").text(totalEntry);
-
 		currentEntry = "";
 	}
 }
@@ -145,11 +149,11 @@ function negate() {
 	checkInputLength();
 	var numToNegate = "";
 
-	if (hitOperation || hasError) { // Do nothing if operator has been hit or an error
+	if (hitOperation || hasError) {
 		return;
-	} else if (hitEqual) {  // After equating, change the sign on both current and total entries
+	} else if (hitEqual) {
 		
-		changeSign(result);
+		changeSign(result, true);
 
 		$(".currentEntry").text(currentEntry);
 		$(".totalEntry").text(totalEntry);
@@ -158,36 +162,24 @@ function negate() {
 
 		hitNegate = true;
 		var joinedEquation = "";
+		var entry = currentEntry;
 
-		var noParenNum = currentEntry.toString().replace(/[()]/g, "");
-		numToNegate = Number(noParenNum) * -1;
-		currentEntry = numToNegate;
-
-		if (numToNegate < 0) {
-			numToNegate = ops.opPar + numToNegate + ops.clPar;
-			currentEntry = numToNegate;
-		}
+		var returnedNum = changeSign(entry, false);
 
 		var splEquation = totalEntry.split("");
 		var i = splEquation.length - 1;
 
 		while (i > -1) {
-			if (splEquation[i] === ops.add || splEquation[i] === ops.mult || 
-				splEquation[i] === ops.div || splEquation[i] === ops.caret) {
+			if (splEquation[i] === ops.add || splEquation[i] === ops.sub || 
+				splEquation[i] === ops.mult || splEquation[i] === ops.div ||
+				splEquation[i] === ops.caret) {
 		 		break;
-			} else if (splEquation[i] === ops.sub){
-				if (splEquation[i - 1] === ops.opPar || splEquation[i - 1] === ops.caret) {
-					splEquation[i] = "";
-				} else {
-					break;
-				}
-			} else {
-				splEquation[i] = "";
-				i--;
 			}
+			splEquation[i] = "";
+			i--;
 		}
 		joinedEquation = splEquation.join("");
-		totalEntry = joinedEquation + numToNegate;
+		totalEntry = joinedEquation + returnedNum;
 		$(".currentEntry").text(currentEntry);
 		$(".totalEntry").text(totalEntry);
 	}
@@ -196,18 +188,36 @@ function negate() {
 /***************************************
 /* CHANGE SIGN ON TOTAL
 ****************************************/
-function changeSign(eq_string) {
+function changeSign(eq_string, for_result) {
 	
-	var noParenNum = eq_string.toString().replace(/[()]/g, "");
-	numToNegate = Number(noParenNum) * -1;
-	result = numToNegate;
+	var grabString = eq_string.toString();
+	var hasDash = grabString.indexOf(ops.dash);
 
-	if (numToNegate < 0) {
-		currentEntry = ops.opPar + numToNegate + ops.clPar;
+	if (hasDash !== -1) {
+		grabString = eq_string.replace(/[()]/g, "").replace(/[^0-9]/g, ops.sub);
+		numToNegate = Number(grabString) * -1;
+	}
+
+	var numToNegate = Number(grabString) * -1;
+
+	if (for_result) {
+		if (numToNegate < 0) {
+			numToNegate *= -1;
+			currentEntry = ops.opPar + ops.dash + numToNegate + ops.clPar;
+		} else {
+			currentEntry = numToNegate;
+		}
 		totalEntry = currentEntry;
+		result = totalEntry;
 	} else {
-		currentEntry = numToNegate;
-		totalEntry = currentEntry;
+		if (numToNegate < 0) {
+			numToNegate *= -1;
+			numToNegate = ops.opPar + ops.dash + numToNegate + ops.clPar;
+			currentEntry = numToNegate;
+		} else {
+			currentEntry = numToNegate;
+		}
+		return numToNegate;
 	}
 }
 
@@ -236,7 +246,7 @@ function allClear() {
 /* CLEAR ENTRY BUTTON FUNCTION
 ****************************************/
 function clearEntry() {
-	if (hitEqual || hasError) { // If something has been equated or there is an error
+	if (hitEqual || hasError) {
 		return;
 	} else {
 		
@@ -266,34 +276,22 @@ function popOff(array, arr_length) {
 	var i = arr.length - 1;
 	var joinedArr = "";
 
-	if (isNaN(Number(arr[i])) && arr[i] !== ops.clPar) {  // If last index is an operator (not a closed paren),
-		arr[i] = "";									  // pop it off and re-enable ability to add operator
+	if (isNaN(Number(arr[i])) && arr[i] !== ops.clPar) {
+		arr[i] = "";
 		hitOperation = false;
 	} else {
 		while(i > -1) {
-			if (arr[i] === ops.add || arr[i] === ops.mult ||	// If operator is encountered, stop immediately
-				arr[i] === ops.div || arr[i] === ops.caret) {
+			if (arr[i] === ops.add || arr[i] === ops.sub ||
+				arr[i] === ops.mult || arr[i] === ops.div || 
+				arr[i] === ops.caret) {
+				hitOperation = true;
 				break;
-			} else if (arr[i] === ops.sub) {					// If operator is a minus,
-				if (arr[i - 1] === ops.opPar) {					// Check operator behind for an open paren
-					arr[i] = "";								// Blank out "-" and continue
-					i--;
-				} else {										// Else, stop immediately
-					break;
-				}
-			} else if (arr[i - 1] === ops.caret) {				// Check if character behind removed character is caret
-				arr[i] = "";
-				hitOperation = true;							// If so, disable ability to add operator
-				i--;
-			} else {											// If no other condition is met, remove character
-				arr[i] = "";
-				i--;
 			}
+			arr[i] = "";
+			i--;
 		}
 	}
-
 	joinedArr = arr.join("");
-
 	return joinedArr;
 }
 
@@ -323,13 +321,15 @@ function doCalculation() {
 		var roundedResult = round(result, 5);
 		var resultLength = result.toString().length;
 		var errString = "ERR";
+		var errorMessage = "";
 
 		if (result === Infinity) {		
 			displayResults(result, errString, true);
 		} else if (isNaN(result)) {
-			displayResults(result, errString, true);
+			errorMessage = "Not A Number!";
+			displayResults(errorMessage, errString, true);
 		} else if (resultLength > 25) {
-			var errorMessage = "Digit Limit Exceeded!";
+			errorMessage = "Digit Limit Exceeded!";
 			displayResults(errorMessage, errString, true);
 		} else {
 			displayResults(roundedResult, oldEquation, false)
@@ -345,15 +345,13 @@ function formatEquation(eq_string) {
 	var finalEq = eq_string;
 	var caretIndex = eq_string.indexOf(ops.caret);
 	
-	// Check for exp in string
-	if (caretIndex !== -1) {
-
-			// Construct newly formatted string
+	if (caretIndex !== -1) {			
 			var frontEq = getFrontEquation(eq_string, caretIndex);
 			var baseNumber = getBaseNumber(eq_string, caretIndex);
 			var exponential = getExponential(eq_string, caretIndex);
 			var backEq = getBackEquation(eq_string, caretIndex);
 
+			// Construct newly formatted string
 			finalEq = frontEq + "Math.pow(" + baseNumber + "," + exponential + ")" + backEq;
 	}
 
@@ -363,9 +361,11 @@ function formatEquation(eq_string) {
 	// Convert all operators (×, ÷, and ^) to eval() friendly characters
 	for (var i = 0; i < eqLen; i++) {
 		if (splEquation[i] === ops.mult) {
-			splEquation[i] = "*";
+			splEquation[i] = ops.ast;
 		} else if (splEquation[i] === ops.div) {
-			splEquation[i] = "/";
+			splEquation[i] = ops.slash;
+		} else if (splEquation[i] === ops.dash) {
+			splEquation[i] = ops.sub;
 		}
 	}
 
@@ -385,7 +385,7 @@ function formatEquation(eq_string) {
 ****************************************/
 function displayResults(result, equation, error) {
 
-	if (error === true) {
+	if (error) {
 		$(".inputScreen").addClass("warningScreen");
 		$(".currentEntry").text(equation);
 		$(".totalEntry").text(result);
@@ -411,21 +411,13 @@ function getBaseNumber(array, current_index) {
 	var baseNumber = "";
 
 	while (i > -1) {
-		if (arr[i] === ops.add || arr[i] === ops.mult || 
-			arr[i] === ops.div) {
+		if (arr[i] === ops.add || arr[i] === ops.sub || 
+			arr[i] === ops.mult || arr[i] === ops.div) {
 			break;
-		} else if (arr[i] === ops.sub) {
-			if (arr[i - 1] === ops.opPar) {
-				tempBaseNumber += arr[i];
-				i--;
-			} else {
-				break;
-			}
 		}
 		tempBaseNumber += arr[i];
 		i--;
 	}
-
 	baseNumber = tempBaseNumber.split("").reverse().join("");
 	return baseNumber;
 }
@@ -443,16 +435,11 @@ function getExponential(array, current_index) {
 	var i = 1;
 
 	while (i < eqLen) {
-		if (newArr[i] === ops.add || newArr[i] === ops.mult ||
-			newArr[i] === ops.div || newArr[i] === ops.caret) {
+
+		if (newArr[i] === ops.add || newArr[i] === ops.sub ||
+			newArr[i] === ops.mult || newArr[i] === ops.div ||
+			newArr[i] === ops.caret) {
 			break;
-		} else if (newArr[i] === ops.sub) {
-			if (newArr[i - 1] === ops.opPar) {
-				tempExp += newArr[i];
-				i++;
-			} else {
-				break;
-			}
 		}
 		tempExp += newArr[i];
 		i++;
@@ -471,20 +458,13 @@ function getFrontEquation (array, current_index) {
 	var i = eqLen - 1;
 
 	while (i > -1) {
-		if (newArr[i] === ops.add || newArr[i] === ops.mult ||
-			newArr[i] === ops.div || newArr[i] === ops.caret) {
+		if (newArr[i] === ops.add || newArr[i] === ops.sub ||
+			newArr[i] === ops.mult || newArr[i] === ops.div ||
+			newArr[i] === ops.caret) {
 			break;
-		} else if (newArr[i] === ops.sub) {
-			if (newArr[i - 1] === ops.opPar) {
-				newArr.pop();
-				i--;
-			} else {
-				break;
-			}
-		} else {
-			newArr.pop();
-			i--;
 		}
+		newArr.pop();
+		i--;
 	}
 	var joinedArr = newArr.join("");
 	return joinedArr;
@@ -501,25 +481,13 @@ function getBackEquation (array, current_index) {
 	var i = 0;
 
 	while (i < eqLen) {
-		
-		var clParIndex = newArr.indexOf(ops.clPar);
-
-		if (newArr[i] === ops.add || newArr[i] === ops.mult ||
-			newArr[i] === ops.div) {
+		if (newArr[i] === ops.add || newArr[i] === ops.sub ||
+			newArr[i] === ops.mult || newArr[i] === ops.div) {
 			break;
-		} else if (newArr[i] === ops.sub) {
-			if (newArr[i - 1] === ""  && clParIndex === -1) {
-				break;
-			} else {
-				newArr[i] = "";
-				i++;
-			}
-		} else {
-			newArr[i] = "";
-			i++;
 		}
+		newArr[i] = "";
+		i++;
 	}
-
 	var joinedArr = newArr.join("");
 	return joinedArr;
 }
@@ -541,9 +509,8 @@ function checkInputLength() {
 		errorMessage = "Total Entry Limit Exceeded!";
 		displayResults(errorMessage, errString, true);
 	}
-
-
 }
+
 /***************************************
 /* ROUNDING FUNCTION
 ****************************************/
