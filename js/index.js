@@ -10,7 +10,7 @@ var expCount = 0;
 var hitZero = false;
 var hitOperation = true;
 var hitEqual = false;
-var hitNegate = true;
+var hitNegate = false;
 var hitExp = false;
 var hasError = false;
 
@@ -36,7 +36,7 @@ function getValueNum() {
 
 	checkInputLength();
 
-	if (hitEqual || hitZero || hasError) {
+	if (hitEqual || hitZero || hitNegate || hasError) {
 		return;
 	} else {
 		
@@ -45,7 +45,6 @@ function getValueNum() {
 		
 		hitEqual = false;
 		hitOperation = false;
-		hitNegate = false;
 		currentEntry += input;
 
 		if (input === "0" && currentEntry.length < 2) {
@@ -159,8 +158,9 @@ function negate() {
 		$(".totalEntry").text(totalEntry);
 		
 	} else {
+		
+		hitNegate ? hitNegate = false: hitNegate = true;
 
-		hitNegate = true;
 		var joinedEquation = "";
 		var entry = currentEntry;
 
@@ -194,7 +194,7 @@ function changeSign(eq_string, for_result) {
 	var hasDash = grabString.indexOf(ops.dash);
 
 	if (hasDash !== -1) {
-		grabString = eq_string.replace(/[()]/g, "").replace(/[^0-9]/g, ops.sub);
+		grabString = eq_string.replace(/[()]/g, "").replace(/[^0-9.]/g, ops.sub);
 		numToNegate = Number(grabString) * -1;
 	}
 
@@ -237,7 +237,7 @@ function allClear() {
 	hitZero = false;
 	hitOperation = true;
 	hitEqual = false;
-	hitNegate = true;
+	hitNegate = false;
 	hitExp = false;
 	hasError = false;
 }
