@@ -23,4 +23,4 @@ Error handling has been implemented to handle:
 
 Live demo here:
 
-[CodePen](http://s.codepen.io/MCatha/debug/qREOqZ)
+[Github Pages](https://m-catha.github.io/calculator/)
