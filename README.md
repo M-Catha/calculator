@@ -2,7 +2,7 @@
 
 A calculator made with HTML, CSS, and Javascript.
 
-User can chain together any combination of functions (using keyboard input or button pushes on the calculator) including :
+Users can chain together any combination of functions (using keyboard input or button pushes on the calculator) including :
 
 * Addition
 * Subtraction
