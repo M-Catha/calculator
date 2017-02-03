@@ -2,7 +2,7 @@
 
 A calculator made with HTML, CSS, and Javascript.
 
-User can chain together any combination of functions including:
+User can chain together any combination of functions including using keyboard input or button pushes on the calculator:
 
 * Addition
 * Subtraction
@@ -10,7 +10,10 @@ User can chain together any combination of functions including:
 * Division
 * Exponentials
 * Decimals
-* Negatives
+* Negatives <sup>*</sup>
+
+**<sup>*</sup> User must use the ~ keyboard key for negating numbers**
+
 
 A large number of corner cases (hopefully all!) have been tested to ensure the user cannot input invalid sequences of numbers/operations (double operators, double decimals, whole numbers with leading zeroes, etc.).  
 
