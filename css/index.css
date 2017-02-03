@@ -1,11 +1,11 @@
 body {
-	background-image:url("../images/lodyas.png");
+	background-image:url("../images/escheresque.png");
 	background-repeat:repeat;
 	background-attachment:fixed;
 }
 
 .container {
-	background-image:url("../images/squairy_light.png");
+	background-image:url("../images/grey.png");
 	background-repeat:repeat;
 	margin:100px auto;
 	width:70%;
