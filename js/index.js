@@ -21,27 +21,27 @@ var ops = {
 	mult: String.fromCharCode(215),	// "×"
 	div: String.fromCharCode(247),	// "÷"
 	caret: String.fromCharCode(94),	// "^"
-	dec: String.fromCharCode(46),	// ".""
+	dec: String.fromCharCode(46),	// "."
 	opPar: String.fromCharCode(40),	// "("
 	clPar: String.fromCharCode(41),	// ")"
 	ast: String.fromCharCode(42),	// "*"
 	slash: String.fromCharCode(47),	// "/"
-	dash: String.fromCharCode(8211)	// "–""
+	dash: String.fromCharCode(8211)	// "–"
 }
 
 /***************************************
 /* GET NUMBER FUNCTION
 ****************************************/
-function getValueNum() {
+function getValueNum(number) {
 
 	checkInputLength();
 
 	if (hitEqual || hitZero || hitNegate || hasError) {
 		return;
 	} else {
-		
+
 		$(".inputScreen").removeClass("warningScreen");
-		var input = $(this).text();
+		var input = verifyInput(number) || $(this).text();
 		
 		hitEqual = false;
 		hitOperation = false;
@@ -61,11 +61,11 @@ function getValueNum() {
 /***************************************
 /* GET OPERATOR FUNCTION
 ****************************************/
-function getValueOperation() {
+function getValueOperation(operator) {
 	
 	checkInputLength();
 
-	var input = $(this).text();
+	var input = verifyInput(operator) || $(this).text();
 	currentEntry = input;
 	
 	hitZero = false;
@@ -92,7 +92,7 @@ function getValueOperation() {
 /***************************************
 /* DECIMAL BUTTON FUNCTION
 ****************************************/
-function addDecimal() {
+function addDecimal(dec) {
 	
 	checkInputLength();
 	decimalCount++;
@@ -105,8 +105,8 @@ function addDecimal() {
 		return;
 	} else {
 		hitOperation = true;
-		currentEntry += ops.dec;
-		totalEntry += ops.dec;
+		currentEntry += verifyInput(dec) || ops.dec;
+		totalEntry += verifyInput(dec) || ops.dec;
 		$(".currentEntry").text(currentEntry);
 		$(".totalEntry").text(totalEntry);
 	}
@@ -115,7 +115,7 @@ function addDecimal() {
 /***************************************
 /* EXPONENT BUTTON FUNCTION
 ****************************************/
-function exponent () {
+function exponent (exp) {
 
 	checkInputLength();
 	decimalCount = 0;
@@ -131,8 +131,8 @@ function exponent () {
 		hitEqual = false;
 		hitOperation = true;
 		expCount++;
-		currentEntry = ops.caret;
-		totalEntry += ops.caret;
+		currentEntry = verifyInput(exp) || ops.caret;
+		totalEntry += verifyInput(exp) || ops.caret;
 		
 		$(".currentEntry").text(currentEntry);
 		$(".totalEntry").text(totalEntry);
@@ -194,7 +194,7 @@ function changeSign(eq_string, for_result) {
 	var hasDash = grabString.indexOf(ops.dash);
 
 	if (hasDash !== -1) {
-		grabString = eq_string.replace(/[()]/g, "").replace(/[^0-9.]/g, ops.sub);
+		grabString = eq_string.replace(/[()]/g, "").replace(/[^0-9\.]/g, ops.sub);
 		numToNegate = Number(grabString) * -1;
 	}
 
@@ -502,15 +502,24 @@ function checkInputLength() {
 	var errString = "ERR";
 	var errorMessage = "";
 
-	if (currentLength > 10) {
+	if (currentLength > 20) {
 		errorMessage = "Current Entry Limit Exceeded!";
 		displayResults(errorMessage, errString, true);
-	} else if (totalLength > 18) {
+	} else if (totalLength > 35) {
 		errorMessage = "Total Entry Limit Exceeded!";
 		displayResults(errorMessage, errString, true);
 	}
 }
 
+/***************************************
+/* VERIFY INPUT
+****************************************/
+function verifyInput(input) {
+	if (typeof input !== "string") {
+		return undefined;
+	}
+	return input;
+}
 /***************************************
 /* ROUNDING FUNCTION
 ****************************************/
@@ -519,8 +528,94 @@ function round(value, decimals) {
 }
 
 /***************************************
-/* EVENT HANDLERS ON BUTTONSS
+/* KEYLOGGER FUNCTION
 ****************************************/
+
+function logKeys(key) {
+
+	switch(key) {
+		case 8:
+			clearEntry();
+			break;
+		case 13:
+		case 61:
+			doCalculation();
+			break;
+		case 42:
+			getValueOperation(ops.mult);
+			break;
+		case 43:
+			getValueOperation(ops.add);
+			break;
+		case 45:
+			getValueOperation(ops.sub);
+			break;
+		case 46:
+			addDecimal(ops.dec);
+			break;
+		case 47:
+			getValueOperation(ops.div);
+			break;
+		case 48:
+			getValueNum("0");
+			break;
+		case 49:
+			getValueNum("1");
+			break;
+		case 50:
+			getValueNum("2");
+			break;
+		case 51:
+			getValueNum("3");
+			break;
+		case 52:
+			getValueNum("4");
+			break;
+		case 53:
+			getValueNum("5");
+			break;
+		case 54:
+			getValueNum("6");
+			break;
+		case 55:
+			getValueNum("7");
+			break;
+		case 56:
+			getValueNum("8");
+			break;
+		case 57:
+			getValueNum("9");
+			break;
+		case 61:
+			doCalculation();
+			break;
+		case 94:
+			exponent(ops.caret);
+			break;
+		case 126:
+			negate();
+			break;
+		default:
+			break;
+	}
+}
+
+/***************************************
+/* EVENT HANDLERS ON BUTTONS
+****************************************/
+
+// Handler for all numbers/operators
+$(document).keypress(function(key) {
+	var keyPressed = key.which;
+	logKeys(keyPressed);
+});
+
+// Special handler for backspace
+$(document).keyup(function(key) {
+	if(key.keyCode === 8) {
+		logKeys(8);
+	}
+})
 $(".number").click(getValueNum);
 $(".operation").click(getValueOperation);
 $(".decimal").click(addDecimal);
